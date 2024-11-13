@@ -57,7 +57,7 @@ test('authenticated user can log out', function () {
     $user = User::factory()->create();
     $token = $user->createToken('auth_token')->plainTextToken;
 
-    $response = $this->withHeaders(['Authorization' => 'Bearer ' . $token])
+    $response = $this->withHeaders(['Authorization' => 'Bearer '.$token])
         ->postJson('/api/v1/auth/logout');
 
     $response->assertStatus(200)

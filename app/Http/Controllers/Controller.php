@@ -6,12 +6,15 @@ use Illuminate\Http\JsonResponse;
 
 abstract class Controller
 {
-    public function respondWithSuccess(string $message, array $data = [], int $status = 200): JsonResponse
+    public function respondWithSuccess(string $message, $data = [], int $status = 200): JsonResponse
     {
-        return response()->json([
-            'message' => $message,
-            'data' => $data,
-        ], $status);
+        $response['message'] = $message;
+
+        if ($data) {
+            $response['data'] = $data;
+        }
+
+        return response()->json($response, $status);
     }
 
     public function respondError(string $message, int $status = 400): JsonResponse

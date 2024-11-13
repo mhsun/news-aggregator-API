@@ -25,7 +25,7 @@ class AuthController extends Controller
             message: 'User registered successfully',
             data: [
                 'access_token' => $token,
-                'token_type' => 'Bearer'
+                'token_type' => 'Bearer',
             ],
             status: 201
         );
@@ -35,7 +35,7 @@ class AuthController extends Controller
     {
         $credentials = $request->only('email', 'password');
 
-        if (!auth()->attempt($credentials)) {
+        if (! auth()->attempt($credentials)) {
             return $this->respondError(
                 message: 'Invalid credentials',
                 status: 401
@@ -50,7 +50,7 @@ class AuthController extends Controller
             message: 'User logged in successfully',
             data: [
                 'access_token' => $token,
-                'token_type' => 'Bearer'
+                'token_type' => 'Bearer',
             ]
         );
     }
