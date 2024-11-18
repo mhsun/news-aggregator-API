@@ -1,7 +1,7 @@
 <?php
 
-use App\Models\User;
 use App\Models\Article;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
 
@@ -26,7 +26,7 @@ test('user can retrieve preferences', function () {
             'sources' => ['BBC News'],
             'categories' => ['Technology'],
             'authors' => ['John Doe'],
-        ]
+        ],
     ]);
 
     Sanctum::actingAs($user);
@@ -40,7 +40,7 @@ test('user can retrieve preferences', function () {
                 'sources' => ['BBC News'],
                 'categories' => ['Technology'],
                 'authors' => ['John Doe'],
-            ]
+            ],
         ]);
 });
 
@@ -49,7 +49,7 @@ test('user can get personalized feed based on preferences', function () {
         'preferences' => [
             'sources' => ['BBC News'],
             'categories' => ['Technology'],
-        ]
+        ],
     ]);
 
     Article::factory()->create(['source' => 'BBC News', 'category' => 'Technology']);

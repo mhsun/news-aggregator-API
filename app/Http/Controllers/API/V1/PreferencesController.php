@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\V1;
+namespace App\Http\Controllers\API\V1;
 
 use App\Http\Controllers\Controller;
 use App\Models\Article;
@@ -46,15 +46,15 @@ class PreferencesController extends Controller
 
         $query = Article::query();
 
-        if (!empty($preferences['sources'])) {
+        if (! empty($preferences['sources'])) {
             $query->whereIn('source', $preferences['sources']);
         }
 
-        if (!empty($preferences['categories'])) {
+        if (! empty($preferences['categories'])) {
             $query->whereIn('category', $preferences['categories']);
         }
 
-        if (!empty($preferences['authors'])) {
+        if (! empty($preferences['authors'])) {
             $query->whereIn('author', $preferences['authors']);
         }
 

@@ -1,14 +1,16 @@
 <?php
 
-namespace App\Http\Controllers\V1;
+namespace App\Http\Controllers\API\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\V1\ArticleResource;
 use App\Models\Article;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Resources\Json\ResourceCollection;
 
 class ArticleController extends Controller
 {
-    public function index(): JsonResponse
+    public function index(): ResourceCollection
     {
         $articles = Article::query()
             ->when(request('date'), fn ($query, $date) => $query->whereDate('published_at', $date))
@@ -18,7 +20,9 @@ class ArticleController extends Controller
             ->when(request('keyword'), fn ($query, $keyword) => $query->where('title', 'like', "%$keyword%"))
             ->simplePaginate(10);
 
-        return $this->respondWithSuccess(message: 'Articles fetched successfully', data: $articles);
+        return ArticleResource::collection($articles)->additional([
+            'message' => 'Articles fetched successfully',
+        ]);
     }
 
     public function show(int $id): JsonResponse
@@ -30,6 +34,8 @@ class ArticleController extends Controller
             return $this->respondError(message: 'Article not found', status: 404);
         }
 
-        return $this->respondWithSuccess(message: 'Article fetched successfully', data: $article);
+        return $this->respondWithSuccess(
+            message: 'Article fetched successfully', data: new ArticleResource($article)
+        );
     }
 }

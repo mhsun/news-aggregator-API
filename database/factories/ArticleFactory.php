@@ -22,6 +22,7 @@ class ArticleFactory extends Factory
             'author' => $this->faker->name,
             'source' => $this->faker->url,
             'category' => $this->faker->word,
+            'external_url' => $this->faker->imageUrl(),
             'published_at' => $this->faker->date(),
         ];
     }

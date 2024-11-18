@@ -2,7 +2,10 @@
 
 namespace App\Providers;
 
-use Illuminate\Http\Response;
+use App\Contracts\NewsProviderInterface;
+use App\Services\News\NewsApiOrgService;
+use App\Services\News\TheGuardianService;
+use App\Services\News\TheNYTimesService;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -10,9 +13,15 @@ class AppServiceProvider extends ServiceProvider
     /**
      * Register any application services.
      */
-    public function register(): void
+    public function register()
     {
-        //
+        $this->app->bind(NewsProviderInterface::class, function () {
+            return [
+                new NewsApiOrgService,
+                new TheGuardianService,
+                new TheNYTimesService,
+            ];
+        });
     }
 
     /**
@@ -20,11 +29,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Response::macro('success', function (string $message, $data = [], int $status = 200) {
-            return response()->json([
-                'message' => $message,
-                'data' => $data,
-            ], $status);
-        });
+        //
     }
 }

@@ -35,4 +35,27 @@ return [
         ],
     ],
 
+    'newsapiorg' => [
+        'v1' => [
+            'url' => 'https://newsapi.org/v2/everything',
+            'page_size' => 100,
+        ],
+        'api_key' => env('NEWSAPI_KEY'),
+    ],
+
+    'the_guardian' => [
+        'v1' => [
+            'url' => 'https://content.guardianapis.com/search',
+            'page_size' => 200,
+        ],
+        'api_key' => env('THE_GUARDIAN_KEY'),
+    ],
+
+    'ny_times' => [
+        'v1' => [
+            'url' => 'https://api.nytimes.com/svc/search/v2/articlesearch.json',
+        ],
+        'api_key' => env('NY_TIMES_KEY'),
+    ],
+
 ];

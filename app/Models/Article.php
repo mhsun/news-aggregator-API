@@ -9,4 +9,18 @@ class Article extends Model
 {
     /** @use HasFactory<\Database\Factories\ArticleFactory> */
     use HasFactory;
+
+    protected $fillable = [
+        'title',
+        'content',
+        'author',
+        'source',
+        'category',
+        'external_url',
+        'published_at',
+    ];
+
+    protected $casts = [
+        'published_at' => 'datetime',
+    ];
 }

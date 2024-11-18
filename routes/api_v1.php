@@ -1,15 +1,10 @@
 <?php
 
-use App\Http\Controllers\V1\ArticleController;
-use App\Http\Controllers\V1\Auth\AuthController;
-use App\Http\Controllers\V1\Auth\PasswordResetController;
-use App\Http\Controllers\V1\PreferencesController;
-use Illuminate\Http\Request;
+use App\Http\Controllers\API\V1\ArticleController;
+use App\Http\Controllers\API\V1\Auth\AuthController;
+use App\Http\Controllers\API\V1\Auth\PasswordResetController;
+use App\Http\Controllers\API\V1\PreferencesController;
 use Illuminate\Support\Facades\Route;
-
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:sanctum');
 
 Route::prefix('v1')->group(function () {
     Route::prefix('auth')->group(function () {
@@ -26,12 +21,16 @@ Route::prefix('v1')->group(function () {
             ->name('password.reset');
     });
 
-    Route::get('/articles', [ArticleController::class, 'index']);
-    Route::get('/articles/{id}', [ArticleController::class, 'show']);
-
     Route::middleware('auth:sanctum')->group(function () {
-        Route::post('/preferences', [PreferencesController::class, 'setPreferences']);
+        Route::get('/articles', [ArticleController::class, 'index'])
+            ->name('articles.index');
+
+        Route::get('/articles/{id}', [ArticleController::class, 'show'])
+            ->name('articles.show');
+
         Route::get('/preferences', [PreferencesController::class, 'getPreferences']);
+        Route::post('/preferences', [PreferencesController::class, 'setPreferences']);
+
         Route::get('/personalized-feed', [PreferencesController::class, 'personalizedFeed']);
     });
 });

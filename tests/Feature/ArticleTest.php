@@ -1,9 +1,13 @@
 <?php
 
 use App\Models\Article;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Laravel\Sanctum\Sanctum;
 
 uses(RefreshDatabase::class);
+
+beforeEach(fn () => Sanctum::actingAs(User::factory()->create()));
 
 test('can fetch paginated list of articles', function () {
     Article::factory()->count(15)->create();
@@ -12,12 +16,10 @@ test('can fetch paginated list of articles', function () {
 
     $response->assertStatus(200)
         ->assertJsonStructure([
-            'message',
             'data' => [
-                'data' => [
-                    '*' => ['id', 'title', 'content', 'author', 'source', 'category', 'published_at']
-                ],
-            ]
+                '*' => ['id', 'title', 'content', 'author', 'source', 'category', 'published_at'],
+            ],
+            'message',
         ]);
 });
 
@@ -32,7 +34,7 @@ test('can fetch single article by ID', function () {
                 'id' => $article->id,
                 'title' => $article->title,
                 'content' => $article->content,
-            ]
+            ],
         ]);
 });
 
@@ -50,7 +52,7 @@ test('can filter articles by keyword', function () {
     $response = $this->getJson('/api/v1/articles?keyword=Laravel');
 
     $response->assertStatus(200)
-        ->assertJsonCount(1, 'data.data');
+        ->assertJsonCount(1, 'data');
 });
 
 test('can filter articles by date', function () {
@@ -60,7 +62,7 @@ test('can filter articles by date', function () {
     $response = $this->getJson('/api/v1/articles?date=2024-11-01');
 
     $response->assertStatus(200)
-        ->assertJsonCount(1, 'data.data');
+        ->assertJsonCount(1, 'data');
 });
 
 test('can filter articles by category', function () {
@@ -70,7 +72,7 @@ test('can filter articles by category', function () {
     $response = $this->getJson('/api/v1/articles?category=Technology');
 
     $response->assertStatus(200)
-        ->assertJsonCount(1, 'data.data')
+        ->assertJsonCount(1, 'data')
         ->assertJsonFragment(['category' => 'Technology']);
 });
 
@@ -81,6 +83,6 @@ test('can filter articles by source', function () {
     $response = $this->getJson('/api/v1/articles?source=BBC News');
 
     $response->assertStatus(200)
-        ->assertJsonCount(1, 'data.data')
+        ->assertJsonCount(1, 'data')
         ->assertJsonFragment(['source' => 'BBC News']);
 });
