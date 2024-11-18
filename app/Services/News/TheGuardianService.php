@@ -6,6 +6,7 @@ use App\Contracts\NewsProviderInterface;
 use App\Models\Article;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 
 class TheGuardianService implements NewsProviderInterface
@@ -93,5 +94,7 @@ class TheGuardianService implements NewsProviderInterface
             ['title', 'category'],
             ['title', 'content', 'author', 'external_url', 'source', 'category', 'published_at']
         );
+
+        Cache::tags(Article::$cacheTag)->flush();
     }
 }

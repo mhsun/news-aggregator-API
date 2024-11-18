@@ -13,16 +13,22 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\ResourceCollection;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 
 class PreferencesController extends Controller
 {
     public function setPreferences(PreferenceSetRequest $request): JsonResponse
     {
-        $preferences = $request->user()->preferences()->updateOrCreate([], [
+        /** @var User $user */
+        $user = $request->user();
+
+        $preferences = $user->preferences()->updateOrCreate([], [
             'preferred_sources' => $request->preferred_sources,
             'preferred_categories' => $request->preferred_categories,
             'preferred_authors' => $request->preferred_authors,
         ]);
+
+        Cache::forget("user_{$user->id}_personalized_feed");
 
         return $this->respondWithSuccess(
             'Preferences updated successfully', data: new UserPreferenceResource($preferences)
@@ -47,27 +53,19 @@ class PreferencesController extends Controller
         /** @var User $user */
         $user = Auth::user();
 
-        /** @var UserPreference $preferences */
-        if (!$preferences = $user->preferences) {
-            return $this->respondError('Preferences not set', 404);
-        }
+        $cacheKey = "user_{$user->id}_personalized_feed";
 
-        $articles = Article::query();
+        $articles = Cache::remember($cacheKey, now()->addHour(), function () use ($user) {
+            /** @var UserPreference $preferences */
+            if (!$preferences = $user->preferences) {
+                return $this->respondError('Preferences not set', 404);
+            }
 
-        if ($preferences->preferred_sources ?? []) {
-            $articles->whereIn('source', $preferences->preferred_sources);
-        }
-
-        if ($preferences->preferred_categories ?? []) {
-            $articles->whereIn('category', $preferences->preferred_categories);
-        }
-
-        if ($preferences->preferred_authors ?? []) {
-            $articles->whereIn('author', $preferences->preferred_authors);
-        }
-
-        $articles = $articles->orderBy('published_at', 'desc')
-            ->simplePaginate(10);
+            return Article::query()
+                ->filterByPreferences($preferences)
+                ->orderBy('published_at', 'desc')
+                ->simplePaginate();
+        });
 
         return ArticleResource::collection($articles)->additional([
             'message' => 'Personalized feed fetched successfully',

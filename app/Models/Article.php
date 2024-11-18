@@ -23,4 +23,23 @@ class Article extends Model
     protected $casts = [
         'published_at' => 'datetime',
     ];
+
+    public static string $cacheTag = 'articles';
+
+    public function scopeFilterByPreferences($query, $preferences)
+    {
+        if ($preferences->preferred_sources) {
+            $query->whereIn('source', $preferences->preferred_sources);
+        }
+
+        if ($preferences->preferred_categories) {
+            $query->orWhereIn('category', $preferences->preferred_categories);
+        }
+
+        if ($preferences->preferred_authors) {
+            $query->orWhereIn('author', $preferences->preferred_authors);
+        }
+
+        return $query;
+    }
 }
