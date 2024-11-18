@@ -3,63 +3,74 @@
 namespace App\Http\Controllers\API\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\V1\PreferenceSetRequest;
+use App\Http\Resources\V1\ArticleResource;
+use App\Http\Resources\V1\UserPreferenceResource;
 use App\Models\Article;
 use App\Models\User;
+use App\Models\UserPreference;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\ResourceCollection;
 use Illuminate\Support\Facades\Auth;
 
 class PreferencesController extends Controller
 {
-    public function setPreferences(Request $request): JsonResponse
+    public function setPreferences(PreferenceSetRequest $request): JsonResponse
     {
-        $request->validate([
-            'sources' => 'array',
-            'categories' => 'array',
-            'authors' => 'array',
+        $preferences = $request->user()->preferences()->updateOrCreate([], [
+            'preferred_sources' => $request->preferred_sources,
+            'preferred_categories' => $request->preferred_categories,
+            'preferred_authors' => $request->preferred_authors,
         ]);
 
-        /** @var User $user */
-        $user = Auth::user();
-
-        $user->preferences = [
-            'sources' => $request->input('sources', []),
-            'categories' => $request->input('categories', []),
-            'authors' => $request->input('authors', []),
-        ];
-        $user->save();
-
-        return $this->respondWithSuccess('Preferences updated successfully');
+        return $this->respondWithSuccess(
+            'Preferences updated successfully', data: new UserPreferenceResource($preferences)
+        );
     }
 
     public function getPreferences(): JsonResponse
     {
+        $preferences = UserPreference::where('user_id', auth()->id())->first();
+
+        if (!$preferences) {
+            return $this->respondError('Preferences not set', 404);
+        }
+
         return $this->respondWithSuccess(
-            message: 'Preferences fetched successfully', data: Auth::user()->preferences
+            message: 'Preferences fetched successfully', data: new UserPreferenceResource($preferences)
         );
     }
 
-    // Get personalized news feed
-    public function personalizedFeed(): JsonResponse
+    public function personalizedFeed(Request $request): ResourceCollection|JsonResponse
     {
-        $preferences = Auth::user()->preferences ?? [];
+        /** @var User $user */
+        $user = Auth::user();
 
-        $query = Article::query();
-
-        if (! empty($preferences['sources'])) {
-            $query->whereIn('source', $preferences['sources']);
+        /** @var UserPreference $preferences */
+        if (!$preferences = $user->preferences) {
+            return $this->respondError('Preferences not set', 404);
         }
 
-        if (! empty($preferences['categories'])) {
-            $query->whereIn('category', $preferences['categories']);
+        $articles = Article::query();
+
+        if ($preferences->preferred_sources ?? []) {
+            $articles->whereIn('source', $preferences->preferred_sources);
         }
 
-        if (! empty($preferences['authors'])) {
-            $query->whereIn('author', $preferences['authors']);
+        if ($preferences->preferred_categories ?? []) {
+            $articles->whereIn('category', $preferences->preferred_categories);
         }
 
-        return $this->respondWithSuccess(
-            message: 'Personalized feed fetched successfully', data: $query->simplePaginate(10)
-        );
+        if ($preferences->preferred_authors ?? []) {
+            $articles->whereIn('author', $preferences->preferred_authors);
+        }
+
+        $articles = $articles->orderBy('published_at', 'desc')
+            ->simplePaginate(10);
+
+        return ArticleResource::collection($articles)->additional([
+            'message' => 'Personalized feed fetched successfully',
+        ]);
     }
 }
