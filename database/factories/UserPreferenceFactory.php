@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -20,6 +21,7 @@ class UserPreferenceFactory extends Factory
             'preferred_sources' => $this->faker->words(3),
             'preferred_categories' => $this->faker->words(3),
             'preferred_authors' => $this->faker->words(3),
+            'user_id' => User::factory(),
         ];
     }
 }

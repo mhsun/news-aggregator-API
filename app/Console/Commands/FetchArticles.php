@@ -31,10 +31,7 @@ class FetchArticles extends Command
 
         /** @var NewsApiOrgService|TheGuardianService|TheNYTimesService $provider */
         foreach ($providers as $provider) {
-            $this->info('Fetching from '.$provider::class);
             $articles = $provider->fetchArticles($query);
-            $this->info('Total '.get_class($provider).' articles fetched: '.count($articles));
-
             $formattedArticles = $provider->format($articles);
             $provider->save($formattedArticles);
         }

@@ -1,66 +1,142 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+# News Aggregator API
 
-## About Laravel
+## Setup Instructions
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+### 1. Clone the Repository
+```bash
+git clone <repository-url>
+cd <project-directory>
+```
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### 2. Set Up Environment
+Copy the `.env.example` file and configure the necessary environment variables:
+```bash
+cp .env.example .env
+```
+Set the following variables:
+- **Database**: Configure `DB_CONNECTION`, `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, and `DB_PASSWORD`.
+- **News API Keys**: Provide API keys for your selected external news APIs.
+```env
+NEWSAPI_KEY=your_newsapi_key
+THE_GUARDIAN_KEY=your_guardian_key
+NY_TIMES_KEY=your_nytimes_key
+```
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### 3. Install Dependencies
+```bash
+docker run --rm \
+    -u "$(id -u):$(id -g)" \
+    -v "$(pwd):/var/www/html" \
+    -w /var/www/html \
+    laravelsail/php83-composer:latest \
+    composer install --ignore-platform-reqs
+```
 
-## Learning Laravel
+### 4. Set Up Laravel Sail (Docker)
+Ensure Docker is installed and running. Start the development environment:
+```bash
+./vendor/bin/sail up -d
+```
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### 5. Run Migrations and Seeders
+```bash
+./vendor/bin/sail artisan migrate --seed
+```
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+### 6. Generate Application Key
+```bash
+./vendor/bin/sail artisan key:generate
+```
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## How to Run the Application
+Start the Laravel server using Sail or PHP's built-in server:
+```bash
+./vendor/bin/sail up
+```
+The application will be accessible at: [http://localhost](http://localhost)
 
-## Laravel Sponsors
+## Testing the Application
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### 1. Run Unit and Feature Tests
+Execute the test suite using Laravel's testing tools:
+```bash
+./vendor/bin/sail artisan test
+```
 
-### Premium Partners
+### 2. Testing Manual Endpoints
+You can test the API using tools like Postman or cURL. Alternatively, visit the API documentation (see below).
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+## Visit API Documentation
+Swagger/OpenAPI documentation is available at:
+```arduino
+http://localhost/api/docs
+```
+Use this for interactive testing and understanding all available endpoints.
 
-## Contributing
+## Assumptions and Considerations
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### Data Aggregation
+- Data from external APIs are fetched daily using Laravel's scheduler. This can be adjusted as needed.
+If we opt to fetch data in real-time, we can use a queue system to handle this. For the simplicity of this project, 
+we fetch data daily as the third party news providers has a restriction on rate limiting and searching data in a broader
+range. If we have a clear idea about the data size, we can use multi-threading/pool to fetch data from multiple 
+sources to reduce the time taken to fetch data for larger payload. And to avoid rate limiting, we can use a delay 
+between each request. In this project, we've avoided such complexity due to the simplicity of the project 
+and not having enough information.
 
-## Code of Conduct
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+- Only locally stored data is used for filtering and searching.
 
-## Security Vulnerabilities
+### Caching
+- Articles are cached for 1 hour. This can be adjusted. We're caching any kind of data that is fetched from the database
+in any order/combination. We can cache the data for a longer time if the data is not updated frequently.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
 
-## License
+- Cache is automatically cleared when articles are modified.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+- To clear all application cache:
+
+```bash
+./vendor/bin/sail artisan cache:clear
+```
+
+### Scheduler
+To run the scheduling, we need to run the following command:
+```bash
+./vendor/bin/sail artisan schedule:run
+```
+
+### API Rate Limiting
+- Rate limiting is in place to prevent abuse of the API. The rate limit is set to 60 requests per minute.
+
+### Error Handling
+- Errors are handled gracefully with appropriate HTTP status codes and error messages.
+- Validation errors are returned with detailed messages for each field.
+
+### Command
+- A custom artisan command is available to fetch data from external APIs manually:
+```bash
+./vendor/bin/sail artisan articles:fetch
+```
+Which takes an optional `--keyword` to select the keyword to search for. This can be used to fetch data for a specific keyword.
+In this project we've used it to minimize the data fetched from the external sources due to rate limiting of a third party API.
+By default, it fetches data for the keyword "technology".
+
+### Security
+- All endpoints are protected with Sanctum tokens where necessary.
+- Input validations and protection against common vulnerabilities (SQL injection, XSS) are in place.
+
+### Environment
+- The application is built assuming local development using Docker.
+- Production setup requires configuring cache drivers (Redis) and queue drivers for optimal performance.
+
+## Deployment Notes
+- Ensure your `.env` file is properly configured for production, including `APP_ENV=production` and `APP_DEBUG=false`.
+- Use `php artisan config:cache` and `php artisan route:cache` to optimize performance.
+- Set up a cron job for Laravel's scheduler to ensure data aggregation runs regularly:
+```bash
+* * * * * cd /path-to-project && php artisan schedule:run >> /dev/null 2>&1
+```
+```
