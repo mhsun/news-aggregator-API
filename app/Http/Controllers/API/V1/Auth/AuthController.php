@@ -11,6 +11,43 @@ use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
+    /**
+     * User registration
+     *
+     * @group Authentication
+     *
+     * @bodyParam name string required The name of the user. Example: John Doe
+     * @bodyParam email string required The email of the user. Example: john@example.com
+     * @bodyParam password string required The password of the user. Example: password
+     * @bodyParam password_confirmation required The password confirmation of the user. Example: password
+     *
+     * @response 201 {
+     *   "message": "User registered successfully",
+     *  "data": {
+     *   "access_token": "xxx",
+     *   "token_type": "Bearer"
+     *  }
+     * }
+     *
+     * @response 422 {
+     *  "message": "The given data was invalid.",
+     *  "errors": {
+     *     "name": [
+     *        "The name field is required."
+     *     ],
+     *    "email": [
+     *      "The email field is required."
+     *   ],
+     *  "password": [
+     *    "The password field is required."
+     *  ]
+     * }
+     * }
+     *
+     * @param RegistrationRequest $request
+     * @return JsonResponse
+     *
+     * */
     public function register(RegistrationRequest $request): JsonResponse
     {
         $user = User::create([
@@ -31,6 +68,29 @@ class AuthController extends Controller
         );
     }
 
+    /**
+     * User login
+     *
+     * @group Authentication
+     *
+     * @bodyParam email string required The email of the user. Example: john@example.com
+     * @bodyParam password string required The password of the user. Example: password
+     *
+     * @response 200 {
+     *  "message": "User logged in successfully",
+     *  "data": {
+     *      "access_token": "xxx",
+     *     "token_type": "Bearer"
+     *  }
+     * }
+     *
+     * @response 401 {
+     * "message": "Invalid credentials"
+     * }
+     *
+     * @param Request $request
+     * @return JsonResponse
+     * */
     public function login(Request $request): JsonResponse
     {
         $credentials = $request->only('email', 'password');
@@ -55,6 +115,18 @@ class AuthController extends Controller
         );
     }
 
+    /**
+     * User logout
+     *
+     * @group Authentication
+     *
+     * @response 200 {
+     *  "message": "Successfully logged out"
+     * }
+     *
+     * @param Request $request
+     * @return JsonResponse
+     * */
     public function logout(Request $request): JsonResponse
     {
         $request->user()->currentAccessToken()->delete();

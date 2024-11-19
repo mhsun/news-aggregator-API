@@ -10,6 +10,24 @@ use Illuminate\Support\Facades\Password;
 
 class PasswordResetController extends Controller
 {
+    /**
+     * Send reset link via email
+     *
+     * @group Authentication
+     *
+     * @bodyParam email string required The email of the user. Example: john@example.com
+     *
+     * @response 200 {
+     *  "message": "We have emailed your password reset link!"
+     * }
+     *
+     * @response 422 {
+     * "message": "We can't find a user with that email address."
+     * }
+     *
+     * @param Request $request
+     * @return JsonResponse
+     * */
     public function sendResetLinkEmail(Request $request): JsonResponse
     {
         $request->validate(['email' => 'required|email']);
@@ -21,6 +39,27 @@ class PasswordResetController extends Controller
             : $this->respondError(message: __($status));
     }
 
+    /**
+     * Reset password
+     *
+     * @group Authentication
+     *
+     * @bodyParam token string required The token sent to the user's email. Example: xxx
+     * @bodyParam email string required The email of the user. Example:
+     * @bodyParam password string required The new password of the user. Example: password
+     * @bodyParam password_confirmation required The new password confirmation of the user. Example: password
+     *
+     * @response 200 {
+     * "message": "Password reset successfully"
+     * }
+     *
+     * @response 422 {
+     * "message": "This password reset token is invalid."
+     * }
+     *
+     * @param Request $request
+     * @return JsonResponse
+     * */
     public function resetPassword(Request $request): JsonResponse
     {
         $request->validate([

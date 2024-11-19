@@ -9,6 +9,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 
+/** @codeCoverageIgnore */
 class NewsApiOrgService implements NewsProviderInterface
 {
     protected string $url;

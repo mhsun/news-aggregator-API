@@ -10,6 +10,7 @@ use Illuminate\Console\Command;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Http\Client\ConnectionException;
 
+/** @codeCoverageIgnore */
 class FetchArticles extends Command
 {
     protected $signature = 'articles:fetch {--keyword=technology}';
