@@ -5,8 +5,8 @@
 
 ### 1. Clone the Repository
 ```bash
-git clone <repository-url>
-cd <project-directory>
+git clone https://github.com/mhsun/news-aggregator-API.git
+cd news-aggregator-API
 ```
 
 ### 2. Set Up Environment
