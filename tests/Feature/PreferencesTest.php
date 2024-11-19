@@ -34,7 +34,7 @@ test('user can retrieve preferences', function () {
     Sanctum::actingAs($user);
 
     $preferences = UserPreference::factory()->create([
-        'user_id' => $user->id
+        'user_id' => $user->id,
     ]);
 
     $response = $this->getJson('/api/v1/preferences');

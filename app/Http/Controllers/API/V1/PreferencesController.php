@@ -39,7 +39,7 @@ class PreferencesController extends Controller
     {
         $preferences = UserPreference::where('user_id', auth()->id())->first();
 
-        if (!$preferences) {
+        if (! $preferences) {
             return $this->respondError('Preferences not set', 404);
         }
 
@@ -57,7 +57,7 @@ class PreferencesController extends Controller
 
         $articles = Cache::remember($cacheKey, now()->addHour(), function () use ($user) {
             /** @var UserPreference $preferences */
-            if (!$preferences = $user->preferences) {
+            if (! $preferences = $user->preferences) {
                 return $this->respondError('Preferences not set', 404);
             }
 

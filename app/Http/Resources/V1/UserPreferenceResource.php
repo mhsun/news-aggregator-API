@@ -12,6 +12,7 @@ class UserPreferenceResource extends JsonResource
      * Transform the resource into an array.
      *
      * @see UserPreference
+     *
      * @return array<string, mixed>
      */
     public function toArray(Request $request): array
